@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3 Search Engine - Live</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-6">
+
+    <div class="max-w-2xl w-full text-center">
+        <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
+            Web3 Search
+        </h1>
+        <p class="text-slate-400 mb-8">Baar oo fur Unstoppable Domains (Web3) adoo jooga Browser caadi ah.</p>
+
+        <div class="glass p-6 rounded-3xl shadow-2xl">
+            <div class="relative flex items-center">
+                <input type="text" id="domainInput" 
+                    class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-4 px-6 text-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all text-white" 
+                    placeholder="Tusaale: maxaas.u ama domain.crypto">
+                <button onclick="resolveDomain()" 
+                    class="absolute right-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-xl transition-all">
+                    Search
+                </button>
+            </div>
+
+            <div id="status" class="mt-6 text-sm font-medium transition-all">
+                </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12">
+            <div class="glass p-4 rounded-2xl text-left">
+                <h3 class="text-purple-400 font-bold mb-1 text-sm uppercase">Faa'iidada</h3>
+                <p class="text-slate-300 text-xs">Kani wuxuu kuu furayaa website-yada Web3 adoon u baahnayn Brave ama Extensions.</p>
+            </div>
+            <div class="glass p-4 rounded-2xl text-left">
+                <h3 class="text-blue-400 font-bold mb-1 text-sm uppercase">Amniga</h3>
+                <p class="text-slate-300 text-xs">Waxaan isticmaalnaa Alchemy API si aan si toos ah blockchain-ka ugu xaqiijino xogta.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function resolveDomain() {
+            const domain = document.getElementById('domainInput').value.trim();
+            const statusDiv = document.getElementById('status');
+            
+            // Your API Key
+            const apiKey = "5c7a6CNiQGzD8KfLluGRN"; 
+            const url = `https://polygon-mainnet.g.alchemy.com/v2/${apiKey}`;
+
+            if (!domain) {
+                showStatus("Fadlan qor domain aad baarto!", "text-yellow-400");
+                return;
+            }
+
+            // Hubi inuu domain-ku saxan yahay
+            if (!domain.includes('.')) {
+                showStatus("Fadlan ku dar qeybta dambe (tusaale: .u ama .crypto)", "text-red-400");
+                return;
+            }
+
+            showStatus("Blockchain-ka ayaa laga baarayaa...", "text-blue-400 animate-pulse");
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jsonrpc: "2.0",
+                        id: 1,
+                        method: "alchemy_resolveName",
+                        params: [domain]
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.result && data.result !== "0x0000000000000000000000000000000000000000") {
+                    showStatus(`Waa la helay! Wallet: ${data.result.substring(0,10)}... <br> Laguu wareejinayaa...`, "text-green-400");
+                    
+                    // Gateway Redirect
+                    setTimeout(() => {
+                        window.location.href = `https://${domain}.limo`;
+                    }, 2000);
+                } else {
+                    showStatus("Waan ka xumahay, domain-kan wali laguma diiwaangelin Blockchain-ka.", "text-red-400");
+                }
+            } catch (error) {
+                console.error(error);
+                showStatus("Khalad ayaa dhacay! Hubi API key-ga ama internet-kaaga.", "text-red-500");
+            }
+        }
+
+        function showStatus(msg, colorClass) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = msg;
+            statusDiv.className = `mt-6 text-sm font-medium transition-all ${colorClass}`;
+        }
+    </script>
+</body>
+</html>
